@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { deposit, payLoan, requestLoan, withdraw } from "./AccountSlice";
 
 function AccountOperations() {
   const [depositAmount, setDepositAmount] = useState("");
@@ -7,13 +9,38 @@ function AccountOperations() {
   const [loanPurpose, setLoanPurpose] = useState("");
   const [currency, setCurrency] = useState("USD");
 
-  function handleDeposit() {}
+  const dispatch = useDispatch();
+  const {
+    loan: currentLoan,
+    loanPurpose: currentLoanPurpose,
+    balance,
+    isLoading,
+  } = useSelector((state) => state.account);
+  console.log(balance);
 
-  function handleWithdrawal() {}
+  function handleDeposit() {
+    if (!depositAmount) return;
+    dispatch(deposit(depositAmount, currency));
+    setDepositAmount("");
+    setCurrency("USD");
+  }
 
-  function handleRequestLoan() {}
+  function handleWithdrawal() {
+    if (!withdrawalAmount) return;
+    dispatch(withdraw(withdrawalAmount));
+    setWithdrawalAmount("");
+  }
 
-  function handlePayLoan() {}
+  function handleRequestLoan() {
+    if (!loanAmount) return;
+    dispatch(requestLoan(loanAmount, loanPurpose));
+    setLoanAmount("");
+    setLoanPurpose("");
+  }
+
+  function handlePayLoan() {
+    dispatch(payLoan());
+  }
 
   return (
     <div>
@@ -35,7 +62,9 @@ function AccountOperations() {
             <option value="GBP">British Pound</option>
           </select>
 
-          <button onClick={handleDeposit}>Deposit {depositAmount}</button>
+          <button onClick={handleDeposit}>
+            {isLoading ? " converting" : `deposit ${depositAmount}`}
+          </button>
         </div>
 
         <div>
@@ -67,7 +96,10 @@ function AccountOperations() {
         </div>
 
         <div>
-          <span>Pay back $X</span>
+          <span>
+            Pay Back {currentLoan === 0 ? "" : currentLoan} (
+            {currentLoanPurpose === "" ? " " : currentLoanPurpose})
+          </span>
           <button onClick={handlePayLoan}>Pay loan</button>
         </div>
       </div>
